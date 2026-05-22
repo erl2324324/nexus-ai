@@ -991,7 +991,7 @@ async function sendMessageRetry(userContent) {
   conversationHistory.push({ role: 'user', content: userContent });
   addTyping();
   try {
-    const res = await fetch('/.netlify/functions/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: sanitizeHistoryForGroq(conversationHistory), mode: currentMode }) });
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: sanitizeHistoryForGroq(conversationHistory), mode: currentMode }) });
     const data = await res.json();
     removeTyping();
     if (data.error) { conversationHistory.pop(); handleSmartError(data.error, () => sendMessageRetry(userContent)); }
@@ -1066,7 +1066,7 @@ File: ' + f.name + ' (' + fmtSize(f.size) + ')' + (f.truncated?' [truncated at 6
   addTyping();
 
   try{
-    const res=await fetch('/.netlify/functions/chat',{
+    const res=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
