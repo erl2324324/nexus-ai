@@ -944,7 +944,7 @@ const ERROR_PATTERNS = [
   { match: /GROQ_API_KEY not set/i, code: 'NO_API_KEY', title: '🔑 API Key Missing', what: 'Your Groq API key is not configured in the server environment.', fix: 'Go to Netlify → Site settings → Environment variables → Add GROQ_API_KEY with your key from console.groq.com', canRetry: false },
   { match: /rate.?limit|429|too many requests/i, code: 'RATE_LIMIT', title: '⏱️ Rate Limit Hit', what: 'Too many requests sent too quickly. Groq is temporarily throttling your app.', fix: 'Wait a few seconds and try again. Free plan limits reset every minute.', canRetry: true, retryDelay: 6000 },
   { match: /invalid.?api.?key|401|authentication|unauthorized/i, code: 'BAD_KEY', title: '🔐 Invalid API Key', what: 'The Groq API key saved in Netlify is wrong or revoked.', fix: 'Generate a new key at console.groq.com/keys then update GROQ_API_KEY in Netlify environment variables.', canRetry: false },
-  { match: /model.?not.?found|no such model|invalid model/i, code: 'BAD_MODEL', title: '🤖 Model Not Found', what: 'The AI model name used in your backend no longer exists on Groq.', fix: 'Update the model names in netlify/functions/chat.js. Check console.groq.com/docs/models for current names.', canRetry: false },
+  { match: /model.?not.?found|no such model|invalid model/i, code: 'BAD_MODEL', title: '🤖 Model Not Found', what: 'The AI model name used in your backend no longer exists on Groq.', fix: 'Update the model names in /api/chat.js. Check console.groq.com/docs/models for current names.', canRetry: false },
   { match: /content.?too.?large|context.?length|token|max_tokens/i, code: 'TOO_LONG', title: '📏 Conversation Too Long', what: 'The conversation history grew too large for the model to handle.', fix: 'Start a new chat to clear the context. Your previous chat is saved in the sidebar.', canRetry: false, action: { label: '+ New Chat', fn: 'newChat()' } },
   { match: /network|failed to fetch|load failed|ERR_/i, code: 'NETWORK', title: '📡 Network Error', what: "Your browser couldn't reach the server. Wi-Fi issue or Netlify function is down.", fix: 'Check your internet connection and try again.', canRetry: true, retryDelay: 3000 },
   { match: /messages\.\d+|role.*user|content.*string|allowed values/i, code: 'MSG_FORMAT', title: '🔧 Message Format Error', what: 'A message in history has the wrong format (common with image uploads).', fix: 'Start a new conversation to clear the bad history.', canRetry: false, action: { label: '+ New Chat', fn: 'newChat()' } },
@@ -991,7 +991,7 @@ async function sendMessageRetry(userContent) {
   conversationHistory.push({ role: 'user', content: userContent });
   addTyping();
   try {
-    const res = await fetch('/.netlify/functions/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: sanitizeHistoryForGroq(conversationHistory), mode: currentMode }) });
+    const res = await fetch('/./api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: sanitizeHistoryForGroq(conversationHistory), mode: currentMode }) });
     const data = await res.json();
     removeTyping();
     if (data.error) { conversationHistory.pop(); handleSmartError(data.error, () => sendMessageRetry(userContent)); }
@@ -1066,7 +1066,7 @@ File: ' + f.name + ' (' + fmtSize(f.size) + ')' + (f.truncated?' [truncated at 6
   addTyping();
 
   try{
-    const res=await fetch('/.netlify/functions/chat',{
+    const res=await fetch('/./api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
